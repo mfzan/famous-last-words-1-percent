@@ -43,6 +43,14 @@ def main():
         handle.write(ENTRY)
     os.chmod(target, 0o644)
 
+    # Read back what landed on disk and gate it again, so a partial
+    # write or an encoding slip can never pass silently.
+    with open(target, "r", encoding="utf-8") as handle:
+        written = handle.read()
+    if written != ENTRY:
+        raise SystemExit("written entry does not match the entry")
+    check_entry(written)
+
     print("wrote %s (%d chars)" % (target, len(ENTRY)))
     return 0
 
